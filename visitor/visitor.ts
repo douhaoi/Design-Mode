@@ -1,15 +1,17 @@
+// 定义访问者
 interface VisitorHandler {
   visitorImageBlock: (block: Block) => void;
   visitorVideoBlock: (block: Block) => void;
   visitorAuddioBlock: (block: Block) => void;
 }
 
+// 定义元素
 interface Block {
   block_id: number;
   accept: (visitor: VisitorHandler) => void;
 }
 
-interface BlockEditorClass {
+interface BlockEditor {
   blocks: Block[];
   addBlock: (block: Block) => void;
   removeBlock: (block: Block) => void;
@@ -51,7 +53,7 @@ class Visitor implements VisitorHandler {
   }
 }
 
-class BlockEditor implements BlockEditorClass {
+class Editor implements BlockEditor {
   blocks: Block[] = [];
 
   addBlock(block: Block) {
@@ -83,9 +85,8 @@ const imageBlock = new ImageBlock();
 const videoBlock = new VideoBlock();
 const audioBlock = new AudioBlock();
 
-// 进行访问
-const blocks = new BlockEditor();
+const blockEditor = new Editor();
 
-blocks.addBlock(imageBlock).addBlock(videoBlock).addBlock(audioBlock);
+blockEditor.addBlock(imageBlock).addBlock(videoBlock).addBlock(audioBlock);
 
-blocks.visit();
+blockEditor.visit();
