@@ -13,7 +13,6 @@ interface BlockEditorClass {
   blocks: Block[];
   addBlock: (block: Block) => void;
   removeBlock: (block: Block) => void;
-  visitor: Visitor;
   visit: () => void;
 }
 
@@ -40,25 +39,20 @@ class VideoBlock implements Block {
 
 class Visitor implements VisitorHandler {
   visitorImageBlock(block: Block) {
-    console.log("图片", block);
+    console.log("图片：", block);
   }
 
   visitorAuddioBlock(block: Block) {
-    console.log("音频", block);
+    console.log("音频：", block);
   }
 
   visitorVideoBlock(block: Block) {
-    console.log("视频", block);
+    console.log("视频：", block);
   }
 }
 
 class BlockEditor implements BlockEditorClass {
   blocks: Block[] = [];
-  visitor: Visitor;
-
-  constructor(visitor: Visitor) {
-    this.visitor = visitor;
-  }
 
   addBlock(block: Block) {
     this.blocks.push(block);
@@ -76,16 +70,21 @@ class BlockEditor implements BlockEditorClass {
 
   visit() {
     this.blocks.forEach((block: Block) => {
-      block.accept(this.visitor);
+      block.accept(visitor);
     });
   }
 }
 
+// 创建访问者
+const visitor = new Visitor();
+
+// 创建对象
 const imageBlock = new ImageBlock();
 const videoBlock = new VideoBlock();
 const audioBlock = new AudioBlock();
 
-const blocks = new BlockEditor(new Visitor());
+// 进行访问
+const blocks = new BlockEditor();
 
 blocks.addBlock(imageBlock).addBlock(videoBlock).addBlock(audioBlock);
 
