@@ -1,59 +1,59 @@
-// 定义访问者
-interface VisitorHandler {
-  visitorImageBlock: (block: Block) => void;
-  visitorVideoBlock: (block: Block) => void;
-  visitorAuddioBlock: (block: Block) => void;
+interface Visitor {
+  visitHeaderBlock: (block: Block) => string;
+  visitParagraphBlock: (block: Block) => string;
+  visitImageBlock: (block: Block) => string;
 }
 
-// 定义元素
 interface Block {
-  block_id: number;
-  accept: (visitor: VisitorHandler) => void;
+  type: string;
+  data: Record<string, any>;
+  accept: (visitor: Visitor) => string;
 }
 
-interface BlockEditor {
-  blocks: Block[];
-  addBlock: (block: Block) => void;
-  removeBlock: (block: Block) => void;
-  visit: () => void;
+interface HeaderBlockData {
+  text: string;
+  level: 1 | 2 | 3 | 4 | 5 | 6;
+}
+
+interface ParagraphBlockData {
+  text: string;
+}
+
+interface ImageBlockData {
+  url: string;
+}
+
+class HeaderBlock implements Block {
+  type = "header";
+
+  constructor(public data: HeaderBlockData) {}
+
+  accept(visitor: Visitor): string {
+    return visitor.visitHeaderBlock(this);
+  }
+}
+
+class ParagraphBlock implements Block {
+  type = "paragraph";
+
+  constructor(public data: ParagraphBlockData) {}
+
+  accept(visitor: Visitor): string {
+    return visitor.visitParagraphBlock(this);
+  }
 }
 
 class ImageBlock implements Block {
-  block_id: number = new Date().getTime();
-  accept(visitor: Visitor) {
-    visitor.visitorImageBlock(this);
+  type = "image";
+
+  constructor(public data: ImageBlockData) {}
+
+  accept(visitor: Visitor): string {
+    return visitor.visitImageBlock(this);
   }
 }
 
-class AudioBlock implements Block {
-  block_id: number = new Date().getTime();
-  accept(visitor: Visitor) {
-    visitor.visitorAuddioBlock(this);
-  }
-}
-
-class VideoBlock implements Block {
-  block_id: number = new Date().getTime();
-  accept(visitor: Visitor) {
-    visitor.visitorVideoBlock(this);
-  }
-}
-
-class Visitor implements VisitorHandler {
-  visitorImageBlock(block: Block) {
-    console.log("图片：", block);
-  }
-
-  visitorAuddioBlock(block: Block) {
-    console.log("音频：", block);
-  }
-
-  visitorVideoBlock(block: Block) {
-    console.log("视频：", block);
-  }
-}
-
-class Editor implements BlockEditor {
+class BlockEditor {
   blocks: Block[] = [];
 
   addBlock(block: Block) {
@@ -62,31 +62,51 @@ class Editor implements BlockEditor {
   }
 
   removeBlock(block: Block) {
-    const index = this.blocks.findIndex(
-      (item) => item.block_id === block.block_id
-    );
-    if (index > -1) {
-      this.blocks.splice(index, 1);
-    }
+    const index = this.blocks.findIndex((item) => item === block);
+    this.blocks.splice(index, 1);
   }
 
-  visit() {
-    this.blocks.forEach((block: Block) => {
-      block.accept(visitor);
+  accept(visitor: Visitor) {
+    let str = ''
+    this.blocks.forEach((block) => {
+      str += block.accept(visitor) + '\n\r';
     });
+
+    return str;
   }
 }
 
-// 创建访问者
-const visitor = new Visitor();
+class HTMLVisitor implements Visitor {
+  visitHeaderBlock(block: Block) {
+    return `<h${block.data.level}>${block.data.text}</h${block.data.level}>`;
+  }
 
-// 创建对象
-const imageBlock = new ImageBlock();
-const videoBlock = new VideoBlock();
-const audioBlock = new AudioBlock();
+  visitParagraphBlock(block: Block) {
+    return `<p>${block.data.text}</p>`;
+  }
 
-const blockEditor = new Editor();
+  visitImageBlock(block: Block) {
+    return `<img src="${block.data.url}" />`;
+  }
+}
 
-blockEditor.addBlock(imageBlock).addBlock(videoBlock).addBlock(audioBlock);
+const blockEditor = new BlockEditor();
 
-blockEditor.visit();
+blockEditor
+  .addBlock(new HeaderBlock({ text: "一级标题", level: 1 }))
+  .addBlock(new ParagraphBlock({ text: "段落" }))
+  .addBlock(
+    new ImageBlock({
+      url: "https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png",
+    })
+  );
+
+const htmlVisitor = new HTMLVisitor();
+const result = blockEditor.accept(htmlVisitor);
+
+/**
+ * <h1>一级标题</h1>
+ * <p>段落</p>
+ * <img src="https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png" />
+ */
+console.warn(result);
