@@ -62,14 +62,16 @@ class BlockEditor {
   }
 
   removeBlock(block: Block) {
-    const index = this.blocks.findIndex((item) => item === block);
-    this.blocks.splice(index, 1);
+    const index = this.blocks.indexOf(block);
+    if (index != -1) {
+      this.blocks.splice(index, 1);
+    }
   }
 
   accept(visitor: Visitor) {
     let str = "";
     this.blocks.forEach((block) => {
-      str += block.accept(visitor) + '\n\r';
+      str += block.accept(visitor) + "\n\r";
     });
 
     return str;
@@ -92,15 +94,17 @@ class HTMLVisitor implements Visitor {
 
 class MarkDownVisitor implements Visitor {
   visitHeaderBlock(block: Block) {
-    return `${new Array(block.data.level).fill('#').join('')} ${block.data.text}`
+    return `${new Array(block.data.level).fill("#").join("")} ${
+      block.data.text
+    }`;
   }
 
   visitParagraphBlock(block: Block) {
-    return `${block.data.text}`
+    return `${block.data.text}`;
   }
 
   visitImageBlock(block: Block) {
-    return `![](${block.data.url})`
+    return `![](${block.data.url})`;
   }
 }
 
@@ -116,9 +120,9 @@ blockEditor
   );
 
 const htmlVisitor = new HTMLVisitor();
-const markDownVisitor = new MarkDownVisitor()
+const markDownVisitor = new MarkDownVisitor();
 const htmlResult = blockEditor.accept(htmlVisitor);
-const markdownResult = blockEditor.accept(markDownVisitor)
+const markdownResult = blockEditor.accept(markDownVisitor);
 
 /**
  * <h1>一级标题</h1>
