@@ -67,7 +67,7 @@ class BlockEditor {
   }
 
   accept(visitor: Visitor) {
-    let str = ''
+    let str = "";
     this.blocks.forEach((block) => {
       str += block.accept(visitor) + '\n\r';
     });
@@ -90,6 +90,20 @@ class HTMLVisitor implements Visitor {
   }
 }
 
+class MarkDownVisitor implements Visitor {
+  visitHeaderBlock(block: Block) {
+    return `${new Array(block.data.level).fill('#').join('')} ${block.data.text}`
+  }
+
+  visitParagraphBlock(block: Block) {
+    return `${block.data.text}`
+  }
+
+  visitImageBlock(block: Block) {
+    return `![](${block.data.url})`
+  }
+}
+
 const blockEditor = new BlockEditor();
 
 blockEditor
@@ -102,11 +116,19 @@ blockEditor
   );
 
 const htmlVisitor = new HTMLVisitor();
-const result = blockEditor.accept(htmlVisitor);
+const markDownVisitor = new MarkDownVisitor()
+const htmlResult = blockEditor.accept(htmlVisitor);
+const markdownResult = blockEditor.accept(markDownVisitor)
 
 /**
  * <h1>一级标题</h1>
  * <p>段落</p>
  * <img src="https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png" />
  */
-console.warn(result);
+console.warn(htmlResult);
+/**
+ * # 一级标题
+ * 段落
+ * ![](https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png)
+ */
+console.warn(markdownResult);
