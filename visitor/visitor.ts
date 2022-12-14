@@ -69,9 +69,9 @@ class BlockEditor {
   }
 
   accept(visitor: Visitor) {
-    let str = "";
+    let str = '';
     this.blocks.forEach((block) => {
-      str += block.accept(visitor) + "\n\r";
+      str = block.accept(visitor);
     });
 
     return str;
@@ -79,32 +79,36 @@ class BlockEditor {
 }
 
 class HTMLVisitor implements Visitor {
+  visitResult:string = '';
+
   visitHeaderBlock(block: Block) {
-    return `<h${block.data.level}>${block.data.text}</h${block.data.level}>`;
+    return this.visitResult += `<h${block.data.level}>${block.data.text}</h${block.data.level}>` + "\n\r";
   }
 
   visitParagraphBlock(block: Block) {
-    return `<p>${block.data.text}</p>`;
+    return this.visitResult += `<p>${block.data.text}</p>` + "\n\r";
   }
 
   visitImageBlock(block: Block) {
-    return `<img src="${block.data.url}" />`;
+    return this.visitResult += `<img src="${block.data.url}" />` + "\n\r";
   }
 }
 
 class MarkDownVisitor implements Visitor {
+  visitResult:string = '';
+  
   visitHeaderBlock(block: Block) {
-    return `${new Array(block.data.level).fill("#").join("")} ${
+    return this.visitResult += `${new Array(block.data.level).fill("#").join("")} ${
       block.data.text
-    }`;
+    }` + "\n\r";
   }
 
   visitParagraphBlock(block: Block) {
-    return `${block.data.text}`;
+    return this.visitResult += `${block.data.text}` + "\n\r";
   }
 
   visitImageBlock(block: Block) {
-    return `![](${block.data.url})`;
+    return this.visitResult += `![](${block.data.url})` + "\n\r";
   }
 }
 
